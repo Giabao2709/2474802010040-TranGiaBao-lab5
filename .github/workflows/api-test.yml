@@ -1,0 +1,38 @@
+name: API Testing with Newman
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  api-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Newman and HTML Extra Reporter
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+
+      - name: Run Newman Test
+        run: |
+          newman run ReqRes_Collection.json \
+          -e ReqRes_Environment.json \
+          -d users.csv \
+          --reporters cli,htmlextra \
+          --reporter-htmlextra-export report.html
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Newman-API-Report
+          path: report.html
